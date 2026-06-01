@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENO — Cadastro de Colaboradores</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --navy:#0A1E3A; --navy-dark:#060F2E; --navy-mid:#1C245C;
+  --gold:#D4A249; --gold-light:#e8c070; --teal:#449B92;
+  --white:#fff; --gray-400:#94a3b8; --gray-600:#64748b;
+  --red:#e53e3e; --green:#38a169;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--navy-dark);min-height:100vh;color:var(--white)}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));border-bottom:3px solid var(--gold);padding:20px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 4px 30px rgba(0,0,0,.4)}
+.logo-shield{width:46px;height:54px;background:var(--gold);clip-path:polygon(50% 0%,100% 15%,100% 70%,50% 100%,0% 70%,0% 15%);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.logo-shield::after{content:'Z';font-size:22px;font-weight:800;color:var(--navy-dark);position:absolute}
+.header-text h1{font-size:18px;font-weight:700;letter-spacing:.5px}
+.header-text p{font-size:11px;color:var(--gold);font-weight:500;letter-spacing:1.5px;text-transform:uppercase}
+.header-badge{margin-left:auto;background:rgba(212,162,73,.15);border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+
+/* PROGRESS */
+.progress-wrap{background:var(--navy);padding:0 28px;border-bottom:1px solid rgba(255,255,255,.06)}
+.progress-steps{display:flex;max-width:960px;margin:0 auto}
+.step-tab{flex:1;padding:12px 6px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;transition:all .3s;font-size:10px;font-weight:500;color:var(--gray-400);letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+.step-tab .step-num{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;transition:all .3s}
+.step-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.step-tab.active .step-num{background:var(--gold);color:var(--navy-dark)}
+.step-tab.done{color:var(--teal)}
+.step-tab.done .step-num{background:var(--teal);color:#fff;font-size:0}
+.step-tab.done .step-num::after{content:'✓';font-size:11px}
+
+/* MAIN */
+.main{max-width:960px;margin:0 auto;padding:28px 20px 80px}
+.panel{display:none;animation:fadeIn .4s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.panel-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.panel-subtitle{font-size:12px;color:var(--gray-400);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.panel-subtitle span{color:var(--gold);font-weight:600}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.col-span-2{grid-column:span 2}
+.col-span-3{grid-column:span 3}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.8px}
+.field label .req{color:#e53e3e;margin-left:3px}
+.field input,.field select,.field textarea{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 13px;color:var(--white);font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:all .25s;width:100%}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.25);font-size:12px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);background:rgba(212,162,73,.07);box-shadow:0 0 0 3px rgba(212,162,73,.15)}
+.field textarea{resize:vertical;min-height:70px}
+.field select option{background:var(--navy-dark);color:var(--white)}
+.field-hint{font-size:11px;color:var(--gray-400)}
+
+/* DIVIDER */
+.section-divider{display:flex;align-items:center;gap:10px;margin:24px 0 16px}
+.section-divider span{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:rgba(68,155,146,.3)}
+
+/* RADIO */
+.radio-group{display:flex;gap:8px;flex-wrap:wrap}
+.radio-option{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 14px;cursor:pointer;transition:all .2s;font-size:12px;color:var(--gray-400);user-select:none}
+.radio-option:hover{border-color:var(--gold);color:var(--white)}
+.radio-option input{display:none}
+.radio-option.selected{background:rgba(212,162,73,.12);border-color:var(--gold);color:var(--gold);font-weight:600}
+.radio-dot{width:13px;height:13px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.radio-option.selected .radio-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+/* OBRA CARDS */
+.obra-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.obra-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.obra-card:hover{border-color:var(--gold);background:rgba(212,162,73,.07)}
+.obra-card.selected{border-color:var(--gold);background:rgba(212,162,73,.12)}
+.obra-icon{font-size:18px;flex-shrink:0}
+.obra-name{font-size:12px;font-weight:600;color:var(--white);line-height:1.3}
+.obra-card.selected .obra-name{color:var(--gold)}
+.obra-check{margin-left:auto;width:16px;height:16px;border-radius:4px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.obra-card.selected .obra-check{background:var(--gold);border-color:var(--gold);color:var(--navy-dark)}
+
+/* SALARY */
+.salary-display{background:rgba(212,162,73,.1);border:1px solid rgba(212,162,73,.3);border-radius:8px;padding:9px 13px;font-size:14px;font-weight:700;color:var(--gold);min-height:40px;display:flex;align-items:center}
+
+/* REVIEW */
+.review-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+.review-card-title{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.review-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:14px}
+.review-row:last-child{border-bottom:none}
+.review-label{font-size:11px;color:var(--gray-400);font-weight:500;flex-shrink:0;min-width:130px}
+.review-value{font-size:12px;color:var(--white);font-weight:500;text-align:right}
+
+/* CONTRATO / REGIMENTO */
+.doc-viewer{background:#fff;color:#1a1a1a;border-radius:12px;padding:32px;max-height:480px;overflow-y:auto;margin-bottom:20px;font-family:'Times New Roman',serif;font-size:13px;line-height:1.7;border:3px solid var(--gold)}
+.doc-viewer h2{color:#0A1E3A;font-size:15px;text-align:center;margin-bottom:4px;font-family:'Arial',sans-serif}
+.doc-viewer h3{color:#D4A249;font-size:12px;text-align:center;margin-bottom:16px;font-family:'Arial',sans-serif;letter-spacing:1px}
+.doc-viewer hr{border:none;border-top:2px solid #D4A249;margin:14px 0}
+.doc-viewer .clausula{font-weight:700;color:#0A1E3A;margin-top:14px;margin-bottom:4px;font-family:'Arial',sans-serif;font-size:12px;text-transform:uppercase}
+.doc-viewer p{margin-bottom:8px;text-align:justify}
+.doc-viewer .dado{background:#f4f6fa;border-left:3px solid #D4A249;padding:4px 10px;margin:4px 0;font-size:12px}
+.doc-viewer table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.doc-viewer table th{background:#0A1E3A;color:#D4A249;padding:6px 10px;text-align:left}
+.doc-viewer table td{padding:5px 10px;border-bottom:1px solid #ddd}
+.doc-viewer table tr:nth-child(even) td{background:#f8f9fa}
+
+/* ASSINATURA */
+.sign-box{background:rgba(255,255,255,.04);border:2px dashed rgba(212,162,73,.4);border-radius:12px;padding:24px;margin:20px 0}
+.sign-box-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sign-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+
+/* CAMERA */
+.camera-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-bottom:14px}
+.camera-wrap video{width:100%;max-height:300px;object-fit:cover;display:block}
+.camera-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px;background:linear-gradient(transparent 60%,rgba(0,0,0,.7))}
+.camera-hint{font-size:12px;color:#fff;text-align:center;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:20px;margin-bottom:10px}
+.selfie-preview{width:100%;border-radius:12px;margin-bottom:14px;border:2px solid var(--gold)}
+.selfie-ok{background:rgba(56,161,105,.15);border:1px solid var(--green);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-transform:uppercase;letter-spacing:.5px}
+.btn-back{background:transparent;border:1.5px solid rgba(255,255,255,.15);color:var(--gray-400)}
+.btn-back:hover{border-color:rgba(255,255,255,.3);color:var(--white)}
+.btn-next{background:var(--gold);color:var(--navy-dark);box-shadow:0 4px 20px rgba(212,162,73,.35)}
+.btn-next:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-submit{background:linear-gradient(135deg,var(--teal),#2d7a72);color:#fff;font-size:13px;padding:13px 32px;box-shadow:0 4px 20px rgba(68,155,146,.4)}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(68,155,146,.5)}
+.btn-camera{background:rgba(212,162,73,.15);border:1.5px solid var(--gold);color:var(--gold);padding:10px 20px}
+.btn-camera:hover{background:rgba(212,162,73,.25)}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--white)}
+.nav-buttons{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08)}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:50px 20px;animation:fadeIn .5s ease}
+.success-icon{width:72px;height:72px;background:rgba(56,161,105,.15);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px}
+.success-screen h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.success-screen p{font-size:13px;color:var(--gray-400);max-width:400px;margin:0 auto 28px;line-height:1.6}
+.success-id{display:inline-block;background:rgba(212,162,73,.1);border:1px solid var(--gold);border-radius:8px;padding:9px 22px;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:28px}
+.send-options{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+
+/* HEX BG */
+.hex-pattern{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-2l26-15V18L28 2 2 18v30l26 16z' fill='%23D4A249'/%3E%3C/svg%3E");background-size:56px 100px;position:fixed;top:0;right:-50px;width:400px;height:100%;opacity:.04;pointer-events:none;z-index:0}
+.form-wrap{position:relative;z-index:1}
+
+/* SCROLLBAR */
+.doc-viewer::-webkit-scrollbar{width:6px}
+.doc-viewer::-webkit-scrollbar-track{background:#f0f0f0}
+.doc-viewer::-webkit-scrollbar-thumb{background:#D4A249;border-radius:3px}
+
+/* MOBILE */
+@media(max-width:640px){
+  .form-grid,.form-grid.three{grid-template-columns:1fr}
+  .col-span-2,.col-span-3{grid-column:span 1}
+  .header{padding:14px}
+  .header-text h1{font-size:15px}
+  .header-badge{display:none}
+  .main{padding:16px 14px 60px}
+  .step-tab .step-label{display:none}
+  .obra-grid{grid-template-columns:1fr 1fr}
+  .sign-fields{grid-template-columns:1fr}
+  .send-options{flex-direction:column;align-items:center}
+}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(6,15,46,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;display:none}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(212,162,73,.2);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--gold);font-weight:600}
+
+/* NOTICE BOX */
+.notice-box{background:rgba(212,162,73,.08);border:1px solid rgba(212,162,73,.3);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--gray-400);line-height:1.6}
+.notice-box strong{color:var(--gold)}
+
+/* PROGRESS READING */
+.read-progress{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.read-progress-bar{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;width:0}
+.read-label{font-size:11px;color:var(--gray-400);margin-bottom:12px;text-align:right}
+</style>
+</head>
+<body>
+<div class="hex-pattern"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Processando...</div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-shield"></div>
+  <div class="header-text">
+    <h1>ZENO Engenharia</h1>
+    <p>Cadastro de Colaboradores</p>
+  </div>
+  <div class="header-badge">Confidencial</div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-tab active" data-step="1"><div class="step-num">1</div><span class="step-label">Pessoal</span></div>
+    <div class="step-tab" data-step="2"><div class="step-num">2</div><span class="step-label">Endereço</span></div>
+    <div class="step-tab" data-step="3"><div class="step-num">3</div><span class="step-label">Documentos</span></div>
+    <div class="step-tab" data-step="4"><div class="step-num">4</div><span class="step-label">Trabalho</span></div>
+    <div class="step-tab" data-step="5"><div class="step-num">5</div><span class="step-label">Revisão</span></div>
+    <div class="step-tab" data-step="6"><div class="step-num">6</div><span class="step-label">Contrato</span></div>
+    <div class="step-tab" data-step="7"><div class="step-num">7</div><span class="step-label">Regimento</span></div>
+  </div>
+</div>
+
+<div class="main form-wrap">
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 1 — DADOS PESSOAIS
+═══════════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-1">
+  <div class="panel-title">👤 Dados Pessoais</div>
+  <div class="panel-subtitle">Campos com <span>*</span> são obrigatórios.</div>
+  <div class="form-grid">
+    <div class="field col-span-2"><label>Nome Completo <span class="req">*</span></label><input type="text" id="nome" placeholder="Nome completo conforme RG" oninput="maskUpper(this)"></div>
+    <div class="field"><label>Data de Nascimento <span class="req">*</span></label><input type="date" id="nascimento" onchange="calcIdade()"></div>
+    <div class="field"><label>Idade</label><input type="text" id="idade" placeholder="Calculada automaticamente" readonly style="opacity:.6;cursor:not-allowed"></div>
+    <div class="field"><label>Sexo <span class="req">*</span></label><select id="sexo"><option value="">Selecione...</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select></div>
+    <div class="field"><label>Estado Civil</label><select id="estado_civil"><option value="">Selecione...</option><option>Solteiro(a)</option><option>Casado(a)</option><option>União Estável</option><option>Divorciado(a)</option><option>Viúvo(a)</option></select></div>
+  </div>
+  <div class="section-divider"><span>Contato</span></div>
+  <div class="form-grid three">
+    <div class="field"><label>Telefone / WhatsApp <span class="req">*</span></label><input type="tel" id="telefone" placeholder="(98) 99999-9999" oninput="maskPhone(this)" maxlength="15"></div>
+    <div class="field"><label>E-mail</label><input type="email" id="email" placeholder="email@exemplo.com"></div>
+    <div class="field"><label>Filhos</label><select id="filhos"><option value="0">Não</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4+">4+</option></select></div>
+  </div>
+  <div class="section-divider"><span>Emergência</span></div>
+  <div class="form-grid">
+    <div class="field"><label>Contato de Emergência</label><input type="text" id="emergencia_nome" placeholder="Nome completo"></div>
+    <div class="field"><label>Telefone de Emergência</label><input type="tel" id="emergencia_tel" placeholder="(98) 99999-9999" oninput="maskPhone(this)" maxlength="15"></div>
+  </div>
+  <div class="nav-buttons"><div></div><button class="btn btn-next" onclick="goTo(2)">Próximo →</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 2 — ENDEREÇO
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-2">
+  <div class="panel-title">🏠 Endereço</div>
+  <div class="panel-subtitle">Endereço residencial atual.</div>
+  <div class="form-grid three">
+    <div class="field"><label>CEP <span class="req">*</span></label><input type="text" id="cep" placeholder="65000-000" oninput="maskCEP(this)" maxlength="9" onblur="buscaCEP()"><span class="field-hint">Digite o CEP para preencher automaticamente</span></div>
+    <div class="field col-span-2"><label>Logradouro <span class="req">*</span></label><input type="text" id="rua" placeholder="Rua, Avenida, Travessa..."></div>
+  </div>
+  <div class="form-grid three">
+    <div class="field"><label>Número <span class="req">*</span></label><input type="text" id="numero" placeholder="Nº ou S/N"></div>
+    <div class="field col-span-2"><label>Complemento</label><input type="text" id="complemento" placeholder="Apt, Bloco, Casa..."></div>
+  </div>
+  <div class="form-grid three">
+    <div class="field col-span-2"><label>Bairro <span class="req">*</span></label><input type="text" id="bairro" placeholder="Nome do bairro"></div>
+    <div class="field"><label>Cidade <span class="req">*</span></label><input type="text" id="cidade" placeholder="São Luís"></div>
+  </div>
+  <div class="form-grid">
+    <div class="field"><label>Estado</label><select id="estado"><option value="MA" selected>Maranhão</option><option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AM">Amazonas</option><option value="AP">Amapá</option><option value="BA">Bahia</option><option value="CE">Ceará</option><option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option><option value="MG">Minas Gerais</option><option value="MS">Mato Grosso do Sul</option><option value="MT">Mato Grosso</option><option value="PA">Pará</option><option value="PB">Paraíba</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option><option value="PR">Paraná</option><option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="RS">Rio Grande do Sul</option><option value="SC">Santa Catarina</option><option value="SE">Sergipe</option><option value="SP">São Paulo</option><option value="TO">Tocantins</option></select></div>
+    <div class="field"><label>Ponto de Referência</label><input type="text" id="referencia" placeholder="Próximo ao mercado X..."></div>
+  </div>
+  <div class="nav-buttons"><button class="btn btn-back" onclick="goTo(1)">← Voltar</button><button class="btn btn-next" onclick="goTo(3)">Próximo →</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 3 — DOCUMENTOS
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-3">
+  <div class="panel-title">📋 Documentos</div>
+  <div class="panel-subtitle">Dados de documentação pessoal.</div>
+  <div class="form-grid">
+    <div class="field"><label>CPF <span class="req">*</span></label><input type="text" id="cpf" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14"></div>
+    <div class="field"><label>RG <span class="req">*</span></label><input type="text" id="rg" placeholder="0000000 SSP-MA" maxlength="20"></div>
+    <div class="field"><label>Órgão Emissor</label><input type="text" id="rg_emissor" placeholder="SSP-MA"></div>
+    <div class="field"><label>Data de Emissão</label><input type="date" id="rg_data"></div>
+  </div>
+  <div class="section-divider"><span>Dados Bancários</span></div>
+  <div class="form-grid three">
+    <div class="field col-span-2"><label>Banco</label><select id="banco"><option value="">Selecione...</option><option>Caixa Econômica Federal</option><option>Banco do Brasil</option><option>Bradesco</option><option>Itaú</option><option>Santander</option><option>Nubank</option><option>Inter</option><option>Sicoob</option><option>Outro</option><option value="nao">Não tem conta</option></select></div>
+    <div class="field"><label>Tipo de Conta</label><select id="tipo_conta"><option value="">Selecione...</option><option>Corrente</option><option>Poupança</option><option>Conta Salário</option></select></div>
+  </div>
+  <div class="form-grid three">
+    <div class="field"><label>Agência</label><input type="text" id="agencia" placeholder="0000"></div>
+    <div class="field"><label>Conta</label><input type="text" id="conta" placeholder="000000-0"></div>
+    <div class="field"><label>Chave PIX</label><input type="text" id="pix" placeholder="CPF, telefone ou e-mail"></div>
+  </div>
+  <div class="section-divider"><span>Histórico Profissional</span></div>
+  <div class="form-grid">
+    <div class="field"><label>Último Empregador</label><input type="text" id="ult_empresa" placeholder="Nome da empresa"></div>
+    <div class="field"><label>Contato do Último Empregador</label><input type="text" id="ult_contato" placeholder="Telefone ou e-mail"></div>
+  </div>
+  <div class="form-grid">
+    <div class="field"><label>Possui mandado em aberto?</label><select id="mandado"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+    <div class="field"><label>Já processou empresa na Justiça do Trabalho?</label><select id="justica"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+  </div>
+  <div class="nav-buttons"><button class="btn btn-back" onclick="goTo(2)">← Voltar</button><button class="btn btn-next" onclick="goTo(4)">Próximo →</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 4 — TRABALHO
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-4">
+  <div class="panel-title">🏗️ Dados do Trabalho</div>
+  <div class="panel-subtitle">Cargo, obra e remuneração.</div>
+  <div class="form-grid">
+    <div class="field"><label>Cargo / Função <span class="req">*</span></label>
+      <select id="cargo" onchange="atualizaSalario()">
+        <option value="">Selecione...</option>
+        <option value="Pedreiro">Pedreiro</option>
+        <option value="Servente">Servente</option>
+        <option value="Carpinteiro">Carpinteiro</option>
+        <option value="Armador">Armador</option>
+        <option value="Eletricista">Eletricista</option>
+        <option value="Encanador">Encanador</option>
+        <option value="Pintor">Pintor</option>
+        <option value="Encarregado">Encarregado</option>
+        <option value="Mestre de Obras">Mestre de Obras</option>
+        <option value="Administrativo">Administrativo</option>
+        <option value="Auxiliar Administrativo">Auxiliar Administrativo</option>
+        <option value="Almoxarife">Almoxarife</option>
+        <option value="Motorista">Motorista</option>
+        <option value="Gesseiro">Gesseiro</option>
+        <option value="Azulejista">Azulejista</option>
+      </select>
+    </div>
+    <div class="field"><label>Salário Mensal</label><div class="salary-display" id="salary_display">Selecione o cargo acima</div></div>
+    <div class="field"><label>Diária (÷22)</label><div class="salary-display" id="diaria_display">—</div></div>
+    <div class="field"><label>Data de Admissão <span class="req">*</span></label><input type="date" id="data_admissao"><span class="field-hint">Data que começou na ZENO</span></div>
+  </div>
+  <div class="section-divider"><span>Contrato</span></div>
+  <div class="notice-box">O regime é <strong>Diarista</strong>. O contrato terá vigência de <strong>3 meses</strong> por obra, renovável.</div>
+  <div class="section-divider"><span>Obra de Alocação <span style="color:var(--red)">*</span></span></div>
+  <div class="obra-grid" id="obra_grid">
+    <div class="obra-card" onclick="selectObra(this,'Monte Parnasse')"><div class="obra-icon">🏢</div><div class="obra-name">Monte Parnasse</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'Mikonos')"><div class="obra-icon">🌊</div><div class="obra-name">Mikonos</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'Ponta D\'Areia')"><div class="obra-icon">⛱️</div><div class="obra-name">Ponta D'Areia</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'Bela Vista')"><div class="obra-icon">🏙️</div><div class="obra-name">Bela Vista</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'La Touche Residence')"><div class="obra-icon">✨</div><div class="obra-name">La Touche Residence</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'Escritório')"><div class="obra-icon">🖥️</div><div class="obra-name">Escritório</div><div class="obra-check">✓</div></div>
+    <div class="obra-card" onclick="selectObra(this,'Outras Luz')"><div class="obra-icon">💡</div><div class="obra-name">Outras Luz</div><div class="obra-check">✓</div></div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="field"><label>Início na Obra Atual</label><input type="date" id="data_obra"></div>
+  </div>
+  <div class="field" style="margin-top:14px"><label>Observações</label><textarea id="obs" placeholder="Informações adicionais..."></textarea></div>
+  <div class="nav-buttons"><button class="btn btn-back" onclick="goTo(3)">← Voltar</button><button class="btn btn-next" onclick="goTo(5)">Revisar →</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 5 — REVISÃO
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-5">
+  <div class="panel-title">✅ Revisão Final</div>
+  <div class="panel-subtitle">Confirme todos os dados antes de prosseguir para o contrato.</div>
+  <div class="review-card"><div class="review-card-title">👤 Dados Pessoais</div><div id="review-pessoal"></div></div>
+  <div class="review-card"><div class="review-card-title">🏠 Endereço</div><div id="review-endereco"></div></div>
+  <div class="review-card"><div class="review-card-title">📋 Documentos</div><div id="review-documentos"></div></div>
+  <div class="review-card"><div class="review-card-title">🏗️ Trabalho</div><div id="review-trabalho"></div></div>
+  <div class="nav-buttons">
+    <button class="btn btn-back" onclick="goTo(4)">← Voltar</button>
+    <button class="btn btn-next" onclick="goTo(6)">Ir para o Contrato →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 6 — CONTRATO
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-6">
+  <div class="panel-title">📄 Contrato de Prestação de Serviços</div>
+  <div class="panel-subtitle">Leia o contrato com atenção antes de assinar.</div>
+
+  <div class="notice-box">📖 <strong>Leia todo o contrato</strong> antes de assinar. Role até o final para liberar a assinatura.</div>
+  <div class="read-progress"><div class="read-progress-bar" id="read-bar-6"></div></div>
+  <div class="read-label" id="read-label-6">0% lido</div>
+
+  <div class="doc-viewer" id="contrato-viewer" onscroll="trackRead(this,'6')">
+    <h2>ZENO CONSTRUTORA E INCORPORADORA LTDA</h2>
+    <h3>CONTRATO DE PRESTAÇÃO DE SERVIÇOS — REGIME DIARISTA</h3>
+    <hr>
+    <p><strong>CONTRATANTE:</strong> ZENO CONSTRUTORA E INCORPORADORA LTDA, CNPJ nº 63.505.862/0001-96, Av. Colares Moreira, nº 100, Ed. Los Angeles, Sala 206, São Luís/MA, representada por TADEU ALBERTO ZENO CHAVES DE JESUS, CPF nº 057.527.733-50.</p>
+    <p><strong>CONTRATADO(A):</strong></p>
+    <div class="dado" id="c-nome">Nome: —</div>
+    <div class="dado" id="c-cpf">CPF: —</div>
+    <div class="dado" id="c-rg">RG: —</div>
+    <div class="dado" id="c-end">Endereço: —</div>
+    <div class="dado" id="c-tel">Telefone: —</div>
+    <div class="dado" id="c-cargo">Cargo: —</div>
+    <div class="dado" id="c-obra">Obra: —</div>
+    <div class="dado" id="c-salario">Remuneração mensal: —</div>
+    <div class="dado" id="c-diaria">Valor da diária: —</div>
+    <div class="dado" id="c-vigencia">Vigência: —</div>
+    <div class="dado" id="c-ult">Último empregador: —</div>
+    <hr>
+    <div class="clausula">Cláusula 1ª — Do Objeto</div>
+    <p>O presente contrato tem por objeto a prestação de serviços de natureza autônoma, na função indicada acima, sem qualquer vínculo empregatício, nos termos dos arts. 593 e seguintes do Código Civil Brasileiro.</p>
+    <div class="clausula">Cláusula 2ª — Da Autonomia</div>
+    <p>O CONTRATADO exercerá suas atividades com total autonomia técnica e administrativa, sem subordinação jurídica, inexistindo controle de jornada, hierarquia funcional ou poder disciplinar por parte do CONTRATANTE.</p>
+    <p>O CONTRATADO é responsável pela execução integral do objeto contratado, sob pena de incidir nas penalidades previstas neste instrumento.</p>
+    <div class="clausula">Cláusula 3ª — Da Remuneração</div>
+    <p>Pelos serviços prestados, a CONTRATANTE pagará ao CONTRATADO o valor da diária indicado acima, com pagamentos realizados todo dia 12 (doze) de cada mês, por depósito bancário ou PIX.</p>
+    <p>O valor inclui R$ 168,00 de auxílio-transporte. Não há vale-alimentação; em substituição, é concedida 1 (uma) hora compensada no intervalo de almoço. Erros por má prestação de serviço poderão ser descontados da remuneração após comunicação formal.</p>
+    <p>O pagamento não possui natureza salarial, não gerando reflexos trabalhistas (FGTS, férias, 13º salário, aviso prévio etc.).</p>
+    <div class="clausula">Cláusula 4ª — Dos Encargos</div>
+    <p>O CONTRATADO é o único responsável pelo recolhimento de tributos, contribuições previdenciárias e demais encargos incidentes sobre sua atividade autônoma.</p>
+    <div class="clausula">Cláusula 5ª — Dos Meios de Execução e Equipamentos</div>
+    <p>Ferramentas e equipamentos disponibilizados pela CONTRATANTE são de total responsabilidade do CONTRATADO quanto à conservação e guarda. Em caso de extravio ou dano por mau uso, os valores serão negociados e descontados de forma parcelada da remuneração.</p>
+    <div class="clausula">Cláusula 6ª — Dos EPIs</div>
+    <p>O CONTRATADO declara que recebeu todos os EPIs necessários para execução de suas atividades e compromete-se a utilizá-los integralmente durante toda a jornada, conforme normas de segurança vigentes.</p>
+    <div class="clausula">Cláusula 7ª — Da Jornada</div>
+    <p>A prestação de serviços ocorrerá das 08h00 às 17h30, com intervalo de almoço das 12h00 às 14h00. Tolerância de 10 (dez) minutos para entrada e saída. Horas extras serão registradas em banco de horas. Atrasos superiores ao tolerado serão descontados proporcionalmente.</p>
+    <div class="clausula">Cláusula 8ª — Da Vigência e Rescisão</div>
+    <p>O contrato vigorará pelo prazo de 3 (três) meses por obra, podendo ser rescindido por qualquer das partes mediante aviso prévio de 10 (dez) dias corridos.</p>
+    <div class="clausula">Cláusula 9ª — Das Penalidades</div>
+    <p>O descumprimento de qualquer cláusula sujeitará a parte inadimplente ao pagamento de multa de 20% (vinte por cento) do valor total ajustado, sem prejuízo de perdas e danos comprovados.</p>
+    <div class="clausula">Cláusula 10ª — Das Declarações do Contratado</div>
+    <p>O CONTRATADO declara, sob pena de rescisão imediata: (a) não possui nenhum mandado em aberto; (b) não possui ação trabalhista ativa ou encerrada contra empresa anterior; (c) as informações prestadas são verdadeiras.</p>
+    <div class="clausula">Cláusula 11ª — Do Regimento Interno</div>
+    <p>O CONTRATADO compromete-se a cumprir o Regimento Interno da ZENO Construtora, do qual receberá uma via assinada, fazendo parte integrante deste contrato.</p>
+    <div class="clausula">Cláusula 12ª — Do Foro</div>
+    <p>Para dirimir quaisquer controvérsias, as partes elegem o foro da Comarca de São Luís/MA.</p>
+    <hr>
+    <p style="font-size:11px;color:#666;text-align:center">As partes concordam que este contrato poderá ser assinado eletronicamente, nos termos da Lei nº 14.063/20.</p>
+  </div>
+
+  <!-- ASSINATURA CONTRATO -->
+  <div class="sign-box">
+    <div class="sign-box-title">✍️ Assinatura do Colaborador</div>
+    <div class="sign-fields">
+      <div class="field"><label>Nome Completo <span class="req">*</span></label><input type="text" id="sign-nome-contrato" placeholder="Digite seu nome completo"></div>
+      <div class="field"><label>CPF <span class="req">*</span></label><input type="text" id="sign-cpf-contrato" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14"></div>
+    </div>
+    <div class="section-divider"><span>📸 Selfie com o Contrato</span></div>
+    <div class="notice-box" style="margin-bottom:12px">Tire uma selfie <strong>segurando o celular ou um papel</strong> com seu nome e a data de hoje escrito. Isso confirma sua identidade e ciência do contrato.</div>
+    <div id="camera-contrato-wrap">
+      <button class="btn btn-camera" onclick="abrirCamera('contrato')" id="btn-cam-contrato">📷 Abrir Câmera</button>
+    </div>
+    <div id="selfie-contrato-preview" style="display:none"></div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-back" onclick="goTo(5)">← Voltar</button>
+    <button class="btn btn-next" id="btn-assinar-contrato" onclick="assinarContrato()" disabled>Assinar e Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANEL 7 — REGIMENTO INTERNO
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-7">
+  <div class="panel-title">📋 Regimento Interno</div>
+  <div class="panel-subtitle">Leia o regimento com atenção e confirme sua ciência.</div>
+
+  <div class="notice-box">📖 <strong>Leia todo o regimento</strong> antes de confirmar. Role até o final para liberar a assinatura.</div>
+  <div class="read-progress"><div class="read-progress-bar" id="read-bar-7"></div></div>
+  <div class="read-label" id="read-label-7">0% lido</div>
+
+  <div class="doc-viewer" id="regimento-viewer" onscroll="trackRead(this,'7')">
+    <h2>ZENO CONSTRUTORA E INCORPORADORA LTDA</h2>
+    <h3>REGIMENTO INTERNO — NORMAS DE CONDUTA E CONVIVÊNCIA</h3>
+    <hr>
+    <p><em>Este Regimento aplica-se a todos os colaboradores e prestadores de serviços da ZENO, independentemente do vínculo contratual. O desconhecimento das normas não exime de responsabilidade.</em></p>
+    <div class="clausula">1. Jornada de Trabalho</div>
+    <p>Horário: 08h00 às 17h30, intervalo de almoço 12h00–14h00, de segunda a sábado. Tolerância de 10 minutos para entrada e saída. Atrasos ou saídas antecipadas além do tolerado serão descontados proporcionalmente da diária. Ausências injustificadas implicam desconto integral.</p>
+    <div class="clausula">2. Horas Extras</div>
+    <p>Somente com autorização prévia do encarregado. Registradas em banco de horas e compensadas em data acordada. Não há pagamento adicional imediato, salvo acordo expresso por escrito.</p>
+    <div class="clausula">3. Remuneração e Benefícios</div>
+    <p>Pagamento todo dia 12 de cada mês, por depósito bancário ou PIX. O valor já inclui auxílio-transporte de R$ 168,00. Não há vale-alimentação; é concedida 1 hora compensada no almoço. Descontos por danos serão informados previamente.</p>
+    <div class="clausula">4. EPIs — Equipamentos de Proteção Individual</div>
+    <p>Uso obrigatório durante toda a jornada, sem exceções. O colaborador é responsável pela conservação dos equipamentos. Em caso de manutenção necessária, comunicar imediatamente ao encarregado. Perdas ou danos por negligência serão descontados de forma parcelada.</p>
+    <div class="clausula">5. Equipamentos e Ferramentas</div>
+    <p>Total responsabilidade do colaborador quanto à guarda e conservação. Extravio, furto ou dano por mau uso: valor descontado de forma parcelada. Não realizar reparos por conta própria sem autorização.</p>
+    <div class="clausula">6. Qualidade do Serviço</div>
+    <p>Todo serviço deve ser executado com qualidade e dentro das normas técnicas. Erros por negligência ou imprudência são de responsabilidade do colaborador, podendo os custos de correção ser descontados após comprovação técnica e comunicação formal.</p>
+    <div class="clausula">7. Ordens de Serviço</div>
+    <p>Toda tarefa deve ser registrada e confirmada com o encarregado antes do início. Não iniciar serviços não autorizados ou fora do escopo da função.</p>
+    <div class="clausula">8. Uso de Celular</div>
+    <p>Permitido apenas durante o intervalo de almoço (12h00–14h00). Proibido durante a jornada de trabalho, exceto em emergências. Descumprimento: advertência verbal → advertência escrita → rescisão por reincidência.</p>
+    <div class="clausula">9. Bebidas Alcoólicas e Substâncias</div>
+    <p>Terminantemente proibido o consumo nas dependências da obra, canteiro ou áreas comuns, em qualquer horário. Proibido apresentar-se ao trabalho em estado de embriaguez ou sob efeito de substâncias. Descumprimento: rescisão imediata.</p>
+    <div class="clausula">10. Proibição de Fumo</div>
+    <p>Proibido fumar em frentes de serviço, edificações, áreas comuns ou locais com risco de incêndio. Fumo permitido apenas em área externa designada, exclusivamente durante o intervalo de almoço. Descumprimento: advertência → rescisão por reincidência.</p>
+    <div class="clausula">11. Respeito, Conduta e Assédio</div>
+    <p>Tratamento respeitoso é obrigatório entre todos. Proibidos: agressão verbal ou física, discriminação, assédio moral ou sexual, ameaças ou intimidação. Comunicar ocorrências ao gestor. Infrator sujeito à rescisão imediata e medidas legais.</p>
+    <div class="clausula">12. Organização e Limpeza</div>
+    <p>Cada colaborador é responsável pela limpeza e organização de seu posto ao final da jornada. Ferramentas e materiais devem ser guardados nos locais designados.</p>
+    <div class="clausula">13. Segurança e Acidentes</div>
+    <p>Qualquer acidente, incidente ou situação de risco deve ser comunicado imediatamente ao encarregado, mesmo sem ferimentos. Omissão configura falta grave e pode implicar rescisão.</p>
+    <div class="clausula">14. Controle de Acesso</div>
+    <p>Somente colaboradores autorizados e visitantes identificados têm acesso à obra. Não autorizar entrada de terceiros sem comunicar ao encarregado. Saída de materiais exige autorização formal.</p>
+    <div class="clausula">15. Sigilo e Redes Sociais</div>
+    <p>Proibido fotografar, filmar ou divulgar imagens da obra, clientes ou projetos sem autorização. Proibido falar em nome da empresa publicamente. Descumprimento configura falta grave sujeita às medidas legais por violação de sigilo.</p>
+    <div class="clausula">16. Aviso para Rescisão</div>
+    <p>O colaborador que desejar encerrar o contrato deve comunicar a gestão com antecedência mínima de 10 (dez) dias corridos. Descumprimento pode implicar desconto proporcional na remuneração final.</p>
+    <hr>
+    <p style="font-size:11px;color:#555;text-align:center">São Luís/MA — ZENO Construtora e Incorporadora Ltda — CNPJ 63.505.862/0001-96</p>
+  </div>
+
+  <!-- ASSINATURA REGIMENTO -->
+  <div class="sign-box">
+    <div class="sign-box-title">✍️ Confirmação de Ciência — Regimento Interno</div>
+    <div class="sign-fields">
+      <div class="field"><label>Nome Completo <span class="req">*</span></label><input type="text" id="sign-nome-reg" placeholder="Digite seu nome completo"></div>
+      <div class="field"><label>CPF <span class="req">*</span></label><input type="text" id="sign-cpf-reg" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14"></div>
+    </div>
+    <div class="section-divider"><span>📸 Selfie de Ciência</span></div>
+    <div class="notice-box" style="margin-bottom:12px">Tire uma selfie confirmando que leu e concordou com o Regimento Interno.</div>
+    <div id="camera-reg-wrap">
+      <button class="btn btn-camera" onclick="abrirCamera('reg')" id="btn-cam-reg">📷 Abrir Câmera</button>
+    </div>
+    <div id="selfie-reg-preview" style="display:none"></div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-back" onclick="goTo(6)">← Voltar</button>
+    <button class="btn btn-submit" id="btn-finalizar" onclick="finalizar()" disabled>✓ Finalizar e Enviar</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">✓</div>
+  <h2>Cadastro Concluído!</h2>
+  <p>Contrato e Regimento assinados com sucesso. Os documentos foram enviados para a ZENO Engenharia.</p>
+  <div class="success-id" id="success-id">Protocolo: #ZENO-00000</div>
+  <div class="send-options" id="send-options"></div>
+  <button class="btn btn-outline" onclick="novoCadastro()" style="margin:0 auto;display:flex">+ Novo Cadastro</button>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxKNmuKeKtm9l79qZPiHXa2dXwLVs-DTL0ZvhMb20r_Bm09gmMYHPtrp6ExdZXW2J77/exec';
+const EMAIL_ZENO = 'zenoengenharia@gmail.com';
+
+const SALARIOS = {
+  'Pedreiro':              { mensal: 2114.00, vt: true },
+  'Servente':              { mensal: 1789.00, vt: true },
+  'Carpinteiro':           { mensal: 2114.00, vt: true },
+  'Armador':               { mensal: 2114.00, vt: true },
+  'Eletricista':           { mensal: 2114.00, vt: true },
+  'Encanador':             { mensal: 2114.00, vt: true },
+  'Pintor':                { mensal: 2114.00, vt: true },
+  'Encarregado':           { mensal: 2800.00, vt: true },
+  'Mestre de Obras':       { mensal: 2800.00, vt: true },
+  'Administrativo':        { mensal: 1621.00, vt: false },
+  'Auxiliar Administrativo':{ mensal: 1621.00, vt: false },
+  'Almoxarife':            { mensal: 1789.00, vt: true },
+  'Motorista':             { mensal: 2114.00, vt: true },
+  'Gesseiro':              { mensal: 2114.00, vt: true },
+  'Azulejista':            { mensal: 2114.00, vt: true },
+};
+
+let selectedObra = '';
+let selfieContrato = null;
+let selfieReg = null;
+let contratoAssinado = false;
+let protocolo = '';
+
+// ══════════════════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ══════════════════════════════════════════════════════════
+function goTo(step) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => {
+    const s = parseInt(t.dataset.step);
+    t.classList.remove('active','done');
+    if (s < step) t.classList.add('done');
+    if (s === step) t.classList.add('active');
+  });
+  if (step === 5) buildReview();
+  if (step === 6) preencheContrato();
+  document.getElementById(`panel-${step}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════════════════
+//  MÁSCARAS
+// ══════════════════════════════════════════════════════════
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value = v;
+}
+function maskPhone(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+  el.value = v;
+}
+function maskCEP(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,8);
+  v = v.replace(/(\d{5})(\d)/,'$1-$2');
+  el.value = v;
+}
+function maskUpper(el) {
+  const pos = el.selectionStart;
+  el.value = el.value.replace(/\b\w/g, c => c.toUpperCase());
+  el.setSelectionRange(pos, pos);
+}
+
+// ══════════════════════════════════════════════════════════
+//  UTILITÁRIOS
+// ══════════════════════════════════════════════════════════
+function get(id) { return document.getElementById(id)?.value || ''; }
+
+function calcIdade() {
+  const dob = get('nascimento');
+  if (!dob) return;
+  const today = new Date(), birth = new Date(dob);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  document.getElementById('idade').value = age + ' anos';
+}
+
+async function buscaCEP() {
+  const cep = get('cep').replace(/\D/g,'');
+  if (cep.length !== 8) return;
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const d = await r.json();
+    if (!d.erro) {
+      document.getElementById('rua').value = d.logradouro || '';
+      document.getElementById('bairro').value = d.bairro || '';
+      document.getElementById('cidade').value = d.localidade || '';
+      const sel = document.getElementById('estado');
+      for (let o of sel.options) if (o.value === d.uf) { sel.value = d.uf; break; }
+    }
+  } catch(e) {}
+}
+
+function atualizaSalario() {
+  const cargo = get('cargo');
+  const info = SALARIOS[cargo];
+  if (!info) {
+    document.getElementById('salary_display').textContent = 'Selecione o cargo acima';
+    document.getElementById('diaria_display').textContent = '—';
+    return;
+  }
+  const mensal = info.mensal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const diaria = (info.mensal / 22).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const vt = info.vt ? ' (inclui R$ 168,00 VT)' : ' (sem VT)';
+  document.getElementById('salary_display').textContent = mensal + vt;
+  document.getElementById('diaria_display').textContent = diaria + '/dia';
+}
+
+function selectObra(el, nome) {
+  document.querySelectorAll('.obra-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedObra = nome;
+}
+
+// ══════════════════════════════════════════════════════════
+//  READING PROGRESS
+// ══════════════════════════════════════════════════════════
+function trackRead(el, panelNum) {
+  const pct = Math.round((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+  const bar = document.getElementById(`read-bar-${panelNum}`);
+  const label = document.getElementById(`read-label-${panelNum}`);
+  if (bar) bar.style.width = Math.min(pct, 100) + '%';
+  if (label) label.textContent = Math.min(pct, 100) + '% lido';
+  if (pct >= 85) {
+    if (panelNum === '6') verificaHabilitaContrato();
+    if (panelNum === '7') verificaHabilitaReg();
+  }
+}
+
+function verificaHabilitaContrato() {
+  const nome = get('sign-nome-contrato').trim();
+  const cpf  = get('sign-cpf-contrato').trim();
+  const btn  = document.getElementById('btn-assinar-contrato');
+  if (nome.length > 5 && cpf.length === 14 && selfieContrato) btn.disabled = false;
+}
+function verificaHabilitaReg() {
+  const nome = get('sign-nome-reg').trim();
+  const cpf  = get('sign-cpf-reg').trim();
+  const btn  = document.getElementById('btn-finalizar');
+  if (nome.length > 5 && cpf.length === 14 && selfieReg) btn.disabled = false;
+}
+
+// Watch sign fields
+document.addEventListener('input', (e) => {
+  if (['sign-nome-contrato','sign-cpf-contrato'].includes(e.target.id)) verificaHabilitaContrato();
+  if (['sign-nome-reg','sign-cpf-reg'].includes(e.target.id)) verificaHabilitaReg();
+});
+
+// ══════════════════════════════════════════════════════════
+//  CÂMERA / SELFIE
+// ══════════════════════════════════════════════════════════
+let stream = null;
+
+async function abrirCamera(tipo) {
+  const wrapId = tipo === 'contrato' ? 'camera-contrato-wrap' : 'camera-reg-wrap';
+  const wrap = document.getElementById(wrapId);
+
+  wrap.innerHTML = `
+    <div class="camera-wrap" id="cam-wrap-${tipo}">
+      <video id="video-${tipo}" autoplay playsinline muted></video>
+      <div class="camera-overlay">
+        <div class="camera-hint">📋 Segure o celular ou papel com seu nome e hoje</div>
+        <button class="btn btn-camera" onclick="tirarFoto('${tipo}')">📸 Tirar Foto</button>
+      </div>
+    </div>
+  `;
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    document.getElementById(`video-${tipo}`).srcObject = stream;
+  } catch(err) {
+    wrap.innerHTML = `<div class="notice-box" style="border-color:var(--red);color:var(--red)">⚠️ Câmera não disponível neste dispositivo. <button class="btn btn-outline" onclick="uploadFoto('${tipo}')" style="margin-left:8px;padding:6px 12px;font-size:11px">📁 Fazer Upload</button></div>`;
+  }
+}
+
+function tirarFoto(tipo) {
+  const video = document.getElementById(`video-${tipo}`);
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+
+  const previewId = tipo === 'contrato' ? 'selfie-contrato-preview' : 'selfie-reg-preview';
+  const wrapId    = tipo === 'contrato' ? 'camera-contrato-wrap'    : 'camera-reg-wrap';
+
+  document.getElementById(wrapId).innerHTML = `
+    <button class="btn btn-camera" onclick="abrirCamera('${tipo}')">🔄 Refazer Foto</button>
+  `;
+  const prev = document.getElementById(previewId);
+  prev.style.display = 'block';
+  prev.innerHTML = `
+    <div class="selfie-ok">✅ Selfie capturada com sucesso!</div>
+    <img src="${dataUrl}" class="selfie-preview" style="max-height:200px;object-fit:cover">
+  `;
+
+  if (tipo === 'contrato') { selfieContrato = dataUrl; verificaHabilitaContrato(); }
+  else                     { selfieReg = dataUrl;      verificaHabilitaReg(); }
+}
+
+function uploadFoto(tipo) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.capture = 'user';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      const previewId = tipo === 'contrato' ? 'selfie-contrato-preview' : 'selfie-reg-preview';
+      const wrapId    = tipo === 'contrato' ? 'camera-contrato-wrap'    : 'camera-reg-wrap';
+      document.getElementById(wrapId).innerHTML = `<button class="btn btn-camera" onclick="abrirCamera('${tipo}')">🔄 Refazer Foto</button>`;
+      const prev = document.getElementById(previewId);
+      prev.style.display = 'block';
+      prev.innerHTML = `<div class="selfie-ok">✅ Foto enviada!</div><img src="${dataUrl}" class="selfie-preview" style="max-height:200px;object-fit:cover">`;
+      if (tipo === 'contrato') { selfieContrato = dataUrl; verificaHabilitaContrato(); }
+      else                     { selfieReg = dataUrl;      verificaHabilitaReg(); }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ══════════════════════════════════════════════════════════
+//  REVIEW
+// ══════════════════════════════════════════════════════════
+function buildReview() {
+  const rows = (data) => data.map(([l,v]) =>
+    `<div class="review-row"><span class="review-label">${l}</span><span class="review-value">${v||'<span style="color:#444">—</span>'}</span></div>`
+  ).join('');
+
+  document.getElementById('review-pessoal').innerHTML = rows([
+    ['Nome',get('nome')],['Nascimento',get('nascimento')?new Date(get('nascimento')+'T12:00').toLocaleDateString('pt-BR'):''],
+    ['Idade',get('idade')],['Sexo',get('sexo')],['Estado Civil',get('estado_civil')],
+    ['Telefone',get('telefone')],['E-mail',get('email')],['Filhos',get('filhos')],
+    ['Emergência',get('emergencia_nome')+(get('emergencia_tel')?' · '+get('emergencia_tel'):'')],
+  ]);
+  document.getElementById('review-endereco').innerHTML = rows([
+    ['CEP',get('cep')],['Endereço',get('rua')+', '+get('numero')+(get('complemento')?' · '+get('complemento'):'')],
+    ['Bairro',get('bairro')],['Cidade/Estado',get('cidade')+' – '+get('estado')],['Referência',get('referencia')],
+  ]);
+  document.getElementById('review-documentos').innerHTML = rows([
+    ['CPF',get('cpf')],['RG',get('rg')+(get('rg_emissor')?' – '+get('rg_emissor'):'')],
+    ['Banco',get('banco')],['Agência/Conta',get('agencia')&&get('conta')?get('agencia')+' / '+get('conta'):''],
+    ['PIX',get('pix')],['Último Empregador',get('ult_empresa')],
+    ['Mandado em aberto',get('mandado')],['Ação trabalhista anterior',get('justica')],
+  ]);
+  const info = SALARIOS[get('cargo')];
+  const mensal = info ? info.mensal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+  const diaria = info ? (info.mensal/22).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+  document.getElementById('review-trabalho').innerHTML = rows([
+    ['Cargo',get('cargo')],['Salário Mensal',mensal],['Diária',diaria],
+    ['Admissão',get('data_admissao')?new Date(get('data_admissao')+'T12:00').toLocaleDateString('pt-BR'):''],
+    ['Obra',selectedObra],['Início na Obra',get('data_obra')?new Date(get('data_obra')+'T12:00').toLocaleDateString('pt-BR'):''],
+    ['Observações',get('obs')],
+  ]);
+}
+
+// ══════════════════════════════════════════════════════════
+//  PREENCHE CONTRATO
+// ══════════════════════════════════════════════════════════
+function preencheContrato() {
+  const info = SALARIOS[get('cargo')];
+  const mensal = info ? info.mensal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+  const diaria = info ? (info.mensal/22).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+
+  const admissao = get('data_admissao');
+  let vigencia = '—';
+  if (admissao) {
+    const inicio = new Date(admissao + 'T12:00');
+    const fim = new Date(inicio);
+    fim.setMonth(fim.getMonth() + 3);
+    vigencia = inicio.toLocaleDateString('pt-BR') + ' a ' + fim.toLocaleDateString('pt-BR');
+  }
+
+  setText('c-nome',   'Nome: ' + get('nome'));
+  setText('c-cpf',    'CPF: ' + get('cpf'));
+  setText('c-rg',     'RG: ' + get('rg') + (get('rg_emissor') ? ' – ' + get('rg_emissor') : ''));
+  setText('c-end',    'Endereço: ' + get('rua') + ', ' + get('numero') + ' – ' + get('bairro') + ', ' + get('cidade') + '/' + get('estado'));
+  setText('c-tel',    'Telefone: ' + get('telefone'));
+  setText('c-cargo',  'Cargo/Função: ' + get('cargo'));
+  setText('c-obra',   'Obra: ' + selectedObra);
+  setText('c-salario','Remuneração mensal: ' + mensal + (info && info.vt ? ' (inclui R$ 168,00 VT)' : ''));
+  setText('c-diaria', 'Valor da diária (÷22): ' + diaria);
+  setText('c-vigencia','Vigência: ' + vigencia + ' (3 meses por obra)');
+  setText('c-ult',    'Último empregador: ' + (get('ult_empresa') || 'Não informado') + (get('ult_contato') ? ' | Contato: ' + get('ult_contato') : ''));
+
+  // Preenche também campos de assinatura com dados do cadastro
+  document.getElementById('sign-nome-contrato').value = get('nome');
+  document.getElementById('sign-cpf-contrato').value  = get('cpf');
+  document.getElementById('sign-nome-reg').value = get('nome');
+  document.getElementById('sign-cpf-reg').value  = get('cpf');
+}
+
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+// ══════════════════════════════════════════════════════════
+//  ASSINAR CONTRATO
+// ══════════════════════════════════════════════════════════
+function assinarContrato() {
+  const nome = get('sign-nome-contrato').trim();
+  const cpf  = get('sign-cpf-contrato').trim();
+  if (!nome || cpf.length < 14) { alert('Preencha seu nome e CPF para assinar.'); return; }
+  if (!selfieContrato) { alert('Tire a selfie para confirmar sua identidade.'); return; }
+  contratoAssinado = true;
+  goTo(7);
+}
+
+// ══════════════════════════════════════════════════════════
+//  FINALIZAR — PDF + ENVIO
+// ══════════════════════════════════════════════════════════
+async function finalizar() {
+  const nome = get('sign-nome-reg').trim();
+  const cpf  = get('sign-cpf-reg').trim();
+  if (!nome || cpf.length < 14) { alert('Preencha seu nome e CPF para confirmar ciência.'); return; }
+  if (!selfieReg) { alert('Tire a selfie para confirmar sua ciência do regimento.'); return; }
+
+  mostrarLoading('Gerando documentos...');
+
+  protocolo = 'ZENO-' + String(Math.floor(Math.random() * 90000) + 10000);
+  const agora = new Date().toLocaleString('pt-BR');
+  const info  = SALARIOS[get('cargo')];
+  const mensal = info ? info.mensal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+  const diaria = info ? (info.mensal/22).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+
+  // Monta dados
+  const dados = {
+    protocolo, timestamp: agora,
+    nome: get('nome'), cpf: get('cpf'), rg: get('rg'), rg_emissor: get('rg_emissor'),
+    nascimento: get('nascimento'), idade: get('idade'), sexo: get('sexo'), estado_civil: get('estado_civil'),
+    telefone: get('telefone'), email: get('email'), filhos: get('filhos'),
+    emergencia_nome: get('emergencia_nome'), emergencia_tel: get('emergencia_tel'),
+    cep: get('cep'), rua: get('rua'), numero: get('numero'), complemento: get('complemento'),
+    bairro: get('bairro'), cidade: get('cidade'), estado: get('estado'), referencia: get('referencia'),
+    banco: get('banco'), agencia: get('agencia'), conta: get('conta'), pix: get('pix'),
+    ult_empresa: get('ult_empresa'), ult_contato: get('ult_contato'),
+    mandado: get('mandado'), justica: get('justica'),
+    cargo: get('cargo'), salario_mensal: mensal, diaria, obra: selectedObra,
+    data_admissao: get('data_admissao'), data_obra: get('data_obra'), obs: get('obs'),
+    assinatura_contrato_nome: get('sign-nome-contrato'),
+    assinatura_contrato_cpf:  get('sign-cpf-contrato'),
+    assinatura_reg_nome: get('sign-nome-reg'),
+    assinatura_reg_cpf:  get('sign-cpf-reg'),
+  };
+
+  // Gera PDF
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    gerarPDF(doc, dados);
+    const pdfBlob = doc.output('blob');
+    const pdfUrl  = URL.createObjectURL(pdfBlob);
+
+    // Salva local
+    const saved = JSON.parse(localStorage.getItem('zeno_colaboradores') || '[]');
+    saved.push({ ...dados, selfie_contrato: selfieContrato ? '[selfie capturada]' : null, selfie_reg: selfieReg ? '[selfie capturada]' : null });
+    localStorage.setItem('zeno_colaboradores', JSON.stringify(saved));
+
+    // Envia para Sheets
+    if (SHEETS_URL && !SHEETS_URL.includes('COLE_AQUI')) {
+      try {
+        await fetch(SHEETS_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+      } catch(e) { console.warn('Sheets:', e); }
+    }
+
+    ocultarLoading();
+    mostrarSucesso(dados, pdfUrl, doc);
+
+  } catch(err) {
+    ocultarLoading();
+    console.error(err);
+    alert('Erro ao gerar PDF. Tente novamente.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  GERAR PDF
+// ══════════════════════════════════════════════════════════
+function gerarPDF(doc, d) {
+  const { jsPDF } = window.jspdf;
+  const W = 210, M = 18;
+  let y = 20;
+
+  function addPage() { doc.addPage(); y = 20; cabecalho(); }
+  function cabecalho() {
+    doc.setFillColor(10, 30, 58);
+    doc.rect(0, 0, W, 14, 'F');
+    doc.setTextColor(212, 162, 73);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','bold');
+    doc.text('ZENO CONSTRUTORA E INCORPORADORA LTDA  |  CNPJ 63.505.862/0001-96', W/2, 9, { align:'center' });
+    y = 20;
+  }
+
+  function linha_h(color=[212,162,73]) {
+    doc.setDrawColor(...color);
+    doc.setLineWidth(0.5);
+    doc.line(M, y, W-M, y);
+    y += 5;
+  }
+
+  function titulo(text) {
+    if (y > 260) addPage();
+    doc.setTextColor(10, 30, 58);
+    doc.setFontSize(14);
+    doc.setFont('helvetica','bold');
+    doc.text(text, W/2, y, { align:'center' });
+    y += 6;
+  }
+
+  function subtit(text) {
+    doc.setTextColor(212, 162, 73);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','bold');
+    doc.text(text, W/2, y, { align:'center' });
+    y += 8;
+  }
+
+  function clausula(text) {
+    if (y > 265) addPage();
+    doc.setTextColor(10, 30, 58);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','bold');
+    doc.text(text.toUpperCase(), M, y);
+    y += 5;
+  }
+
+  function para(text, indent=0) {
+    if (y > 265) addPage();
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(text, W - M*2 - indent);
+    doc.text(lines, M + indent, y);
+    y += lines.length * 5 + 2;
+  }
+
+  function dado(label, value) {
+    if (y > 265) addPage();
+    doc.setFillColor(244, 246, 250);
+    doc.rect(M, y-4, W-M*2, 8, 'F');
+    doc.setDrawColor(212,162,73);
+    doc.setLineWidth(0.8);
+    doc.line(M, y-4, M, y+4);
+    doc.setTextColor(10,30,58);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','bold');
+    doc.text(label + ': ', M+3, y+1);
+    const lw = doc.getTextWidth(label + ': ');
+    doc.setTextColor(60,60,60);
+    doc.setFont('helvetica','normal');
+    doc.text(value || '—', M+3+lw, y+1);
+    y += 9;
+  }
+
+  // ── PÁGINA 1: CONTRATO ──
+  cabecalho();
+  titulo('CONTRATO DE PRESTAÇÃO DE SERVIÇOS');
+  subtit('REGIME DIARISTA');
+  linha_h();
+
+  clausula('Das Partes');
+  para('CONTRATANTE: ZENO CONSTRUTORA E INCORPORADORA LTDA, CNPJ nº 63.505.862/0001-96, representada por TADEU ALBERTO ZENO CHAVES DE JESUS, CPF nº 057.527.733-50.');
+  y += 2;
+  para('CONTRATADO(A):');
+
+  dado('Nome', d.nome);
+  dado('CPF', d.cpf);
+  dado('RG', d.rg + (d.rg_emissor ? ' – ' + d.rg_emissor : ''));
+  dado('Endereço', d.rua + ', ' + d.numero + ' – ' + d.bairro + ', ' + d.cidade + '/' + d.estado);
+  dado('Telefone', d.telefone);
+  dado('E-mail', d.email || '—');
+  dado('Cargo/Função', d.cargo);
+  dado('Obra', d.obra);
+  dado('Remuneração Mensal', d.salario_mensal);
+  dado('Valor da Diária (÷22)', d.diaria);
+  dado('Admissão', d.data_admissao ? new Date(d.data_admissao+'T12:00').toLocaleDateString('pt-BR') : '—');
+  dado('Vigência', d.data_admissao ? (() => { const i=new Date(d.data_admissao+'T12:00');const f=new Date(i);f.setMonth(f.getMonth()+3);return i.toLocaleDateString('pt-BR')+' a '+f.toLocaleDateString('pt-BR'); })() : '—');
+  dado('Último Empregador', d.ult_empresa || '—');
+
+  y += 3; linha_h([200,200,200]);
+
+  ['Cláusula 1ª – Do Objeto|O presente contrato tem por objeto a prestação de serviços de natureza autônoma, na função indicada acima, sem qualquer vínculo empregatício, nos termos dos arts. 593 e seguintes do Código Civil Brasileiro.',
+   'Cláusula 2ª – Da Autonomia|O CONTRATADO exercerá suas atividades com total autonomia técnica e administrativa, sem subordinação jurídica. É responsável pela execução integral do objeto contratado.',
+   'Cláusula 3ª – Da Remuneração|Pagamentos realizados todo dia 12 de cada mês, por depósito bancário ou PIX. O valor inclui R$ 168,00 de auxílio-transporte. Não há vale-alimentação; é concedida 1 hora compensada no almoço. O pagamento não possui natureza salarial.',
+   'Cláusula 4ª – Dos Encargos|O CONTRATADO é o único responsável pelo recolhimento de tributos e contribuições previdenciárias incidentes sobre sua atividade autônoma.',
+   'Cláusula 5ª – Equipamentos|Ferramentas disponibilizadas pela CONTRATANTE são de responsabilidade do CONTRATADO. Danos por mau uso serão descontados de forma parcelada da remuneração.',
+   'Cláusula 6ª – EPIs|O CONTRATADO declara que recebeu todos os EPIs necessários e compromete-se a utilizá-los integralmente durante toda a jornada.',
+   'Cláusula 7ª – Da Jornada|Horário: 08h00 às 17h30, intervalo 12h00–14h00. Tolerância de 10 minutos. Horas extras registradas em banco de horas.',
+   'Cláusula 8ª – Da Vigência|O contrato vigorará por 3 (três) meses por obra, podendo ser rescindido mediante aviso prévio de 10 (dez) dias corridos.',
+   'Cláusula 9ª – Das Penalidades|Descumprimento de cláusulas: multa de 20% do valor total ajustado, sem prejuízo de perdas e danos.',
+   'Cláusula 10ª – Das Declarações|O CONTRATADO declara: (a) não possui mandado em aberto; (b) não possui ação trabalhista ativa contra empresa anterior; (c) as informações são verdadeiras.',
+   'Cláusula 11ª – Regimento|O CONTRATADO compromete-se a cumprir o Regimento Interno da ZENO, parte integrante deste contrato.',
+   'Cláusula 12ª – Do Foro|Foro: Comarca de São Luís/MA.',
+  ].forEach(item => {
+    const [cl, txt] = item.split('|');
+    clausula(cl);
+    para(txt, 4);
+    y += 1;
+  });
+
+  // Assinaturas contrato
+  if (y > 230) addPage();
+  y += 6;
+  linha_h();
+  doc.setTextColor(60,60,60);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','italic');
+  doc.text('São Luís/MA, ' + new Date().toLocaleDateString('pt-BR') + '  |  Protocolo: ' + d.protocolo, W/2, y, { align:'center' });
+  y += 10;
+
+  // Selfie contrato
+  if (selfieContrato) {
+    try {
+      doc.addImage(selfieContrato, 'JPEG', M, y, 40, 30);
+      doc.setFontSize(7);
+      doc.setTextColor(100,100,100);
+      doc.text('Selfie de identificação – Contrato', M, y+32);
+    } catch(e) {}
+    y += 38;
+  }
+
+  doc.setDrawColor(100,100,100);
+  doc.setLineWidth(0.3);
+  doc.line(M, y+10, M+80, y+10);
+  doc.line(W-M-80, y+10, W-M, y+10);
+  doc.setFontSize(8);
+  doc.setTextColor(60,60,60);
+  doc.setFont('helvetica','normal');
+  doc.text(d.assinatura_contrato_nome || d.nome, M+40, y+14, { align:'center' });
+  doc.text('TADEU ALBERTO ZENO CHAVES DE JESUS', W-M-40, y+14, { align:'center' });
+  doc.setFontSize(7);
+  doc.setTextColor(120,120,120);
+  doc.text('Colaborador – CPF: ' + (d.assinatura_contrato_cpf || d.cpf), M+40, y+18, { align:'center' });
+  doc.text('Representante Legal – ZENO Engenharia', W-M-40, y+18, { align:'center' });
+  y += 28;
+
+  // ── PÁGINA 2: REGIMENTO ──
+  addPage();
+  titulo('REGIMENTO INTERNO');
+  subtit('NORMAS DE CONDUTA E CONVIVÊNCIA — ZENO CONSTRUTORA');
+  linha_h();
+
+  [
+    ['1. Jornada de Trabalho','Horário: 08h00 às 17h30, intervalo 12h00–14h00, segunda a sábado. Tolerância de 10 minutos. Atrasos além do tolerado descontados proporcionalmente da diária.'],
+    ['2. Horas Extras','Somente com autorização prévia. Registradas em banco de horas. Não há pagamento adicional imediato.'],
+    ['3. Remuneração','Pagamento dia 12 de cada mês. Valor inclui R$ 168,00 de VT. Sem vale-alimentação; concedida 1 hora compensada no almoço.'],
+    ['4. EPIs','Uso obrigatório durante toda a jornada. Responsabilidade total do colaborador pela conservação. Danos por negligência descontados parceladamente.'],
+    ['5. Equipamentos e Ferramentas','Total responsabilidade do colaborador. Extravio ou dano por mau uso: desconto parcelado. Não realizar reparos sem autorização.'],
+    ['6. Qualidade do Serviço','Serviços executados com qualidade e dentro das normas técnicas. Erros por negligência são de responsabilidade do colaborador.'],
+    ['7. Ordens de Serviço','Registrar e confirmar toda tarefa com o encarregado antes do início.'],
+    ['8. Uso de Celular','Permitido apenas no intervalo de almoço (12h–14h). Descumprimento: advertência → rescisão por reincidência.'],
+    ['9. Bebidas Alcoólicas','Terminantemente proibido nas dependências da obra. Apresentar-se ao trabalho embriagado: rescisão imediata.'],
+    ['10. Fumo','Proibido em frentes de serviço, edificações e áreas comuns. Somente em área externa designada no intervalo de almoço.'],
+    ['11. Respeito e Conduta','Tratamento respeitoso obrigatório. Proibidos: agressão, assédio, discriminação, ameaças. Infrator sujeito à rescisão imediata.'],
+    ['12. Organização e Limpeza','Cada colaborador responsável pela limpeza de seu posto ao final da jornada.'],
+    ['13. Segurança e Acidentes','Qualquer acidente ou risco deve ser comunicado imediatamente ao encarregado. Omissão configura falta grave.'],
+    ['14. Controle de Acesso','Somente colaboradores autorizados acessam a obra. Saída de materiais exige autorização formal.'],
+    ['15. Sigilo e Redes Sociais','Proibido fotografar ou divulgar imagens da obra sem autorização. Proibido falar em nome da empresa publicamente.'],
+    ['16. Aviso para Rescisão','Aviso prévio mínimo de 10 (dez) dias corridos. Descumprimento pode implicar desconto proporcional na remuneração final.'],
+  ].forEach(([cl, txt]) => { clausula(cl); para(txt, 4); y += 1; });
+
+  // Assinaturas regimento
+  if (y > 230) addPage();
+  y += 6;
+  linha_h();
+  doc.setTextColor(60,60,60);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','italic');
+  doc.text('Declaro que recebi, li e concordo com todas as normas deste Regimento Interno.', W/2, y, { align:'center' });
+  y += 4;
+  doc.text('São Luís/MA, ' + new Date().toLocaleDateString('pt-BR'), W/2, y, { align:'center' });
+  y += 10;
+
+  if (selfieReg) {
+    try {
+      doc.addImage(selfieReg, 'JPEG', M, y, 40, 30);
+      doc.setFontSize(7);
+      doc.setTextColor(100,100,100);
+      doc.text('Selfie de ciência – Regimento', M, y+32);
+    } catch(e) {}
+    y += 38;
+  }
+
+  doc.setDrawColor(100,100,100);
+  doc.setLineWidth(0.3);
+  doc.line(M, y+10, M+80, y+10);
+  doc.line(W-M-80, y+10, W-M, y+10);
+  doc.setFontSize(8);
+  doc.setTextColor(60,60,60);
+  doc.setFont('helvetica','normal');
+  doc.text(d.assinatura_reg_nome || d.nome, M+40, y+14, { align:'center' });
+  doc.text('TADEU ALBERTO ZENO CHAVES DE JESUS', W-M-40, y+14, { align:'center' });
+  doc.setFontSize(7);
+  doc.setTextColor(120,120,120);
+  doc.text('Colaborador – CPF: ' + (d.assinatura_reg_cpf || d.cpf), M+40, y+18, { align:'center' });
+  doc.text('Representante Legal – ZENO Engenharia', W-M-40, y+18, { align:'center' });
+
+  // Rodapé em todas as páginas
+  const total = doc.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFillColor(10, 30, 58);
+    doc.rect(0, 287, W, 10, 'F');
+    doc.setTextColor(212,162,73);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','normal');
+    doc.text('Protocolo: ' + d.protocolo + '  |  Gerado em: ' + d.timestamp + '  |  Pág. ' + i + '/' + total, W/2, 293, { align:'center' });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SUCESSO E ENVIO
+// ══════════════════════════════════════════════════════════
+function mostrarSucesso(d, pdfUrl, docPDF) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.add('done'));
+  document.getElementById('success-screen').style.display = 'block';
+  document.getElementById('success-id').textContent = 'Protocolo: #' + d.protocolo;
+
+  const emailBody = encodeURIComponent(
+    `Protocolo: ${d.protocolo}\n` +
+    `Nome: ${d.nome}\n` +
+    `CPF: ${d.cpf}\n` +
+    `Cargo: ${d.cargo}\n` +
+    `Obra: ${d.obra}\n` +
+    `Admissão: ${d.data_admissao}\n` +
+    `Salário: ${d.salario_mensal}\n` +
+    `Telefone: ${d.telefone}\n` +
+    `Documento assinado gerado em ${d.timestamp}`
+  );
+  const emailSubject = encodeURIComponent(`[ZENO] Novo Cadastro – ${d.nome} – ${d.protocolo}`);
+  const emailHref = `mailto:${EMAIL_ZENO}?subject=${emailSubject}&body=${emailBody}`;
+
+  const wpp = d.telefone.replace(/\D/g,'');
+  const wppMsg = encodeURIComponent(
+    `✅ *ZENO Engenharia* — Seu cadastro foi registrado!\n\n` +
+    `Protocolo: *${d.protocolo}*\n` +
+    `Nome: ${d.nome}\n` +
+    `Cargo: ${d.cargo}\n` +
+    `Obra: ${d.obra}\n\n` +
+    `Seus documentos (Contrato + Regimento Interno) foram gerados com suas assinaturas.\n\n` +
+    `Em caso de dúvidas, entre em contato com a ZENO Engenharia.`
+  );
+  const wppHref = `https://wa.me/55${wpp}?text=${wppMsg}`;
+
+  const opts = document.getElementById('send-options');
+  opts.innerHTML = `
+    <a href="${pdfUrl}" download="Contrato_Regimento_${d.nome.replace(/ /g,'_')}_${d.protocolo}.pdf" class="btn btn-next">⬇️ Baixar PDF Assinado</a>
+    <a href="${emailHref}" class="btn btn-camera" target="_blank">📧 Enviar por E-mail</a>
+    ${d.telefone ? `<a href="${wppHref}" class="btn btn-camera" target="_blank">📲 Enviar pelo WhatsApp</a>` : ''}
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function mostrarLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || 'Processando...';
+  document.getElementById('loading').style.display = 'flex';
+}
+function ocultarLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
+function novoCadastro() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.querySelectorAll('input:not([readonly]), select, textarea').forEach(el => el.value = '');
+  document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.obra-card').forEach(c => c.classList.remove('selected'));
+  selectedObra = ''; selfieContrato = null; selfieReg = null; contratoAssinado = false;
+  document.getElementById('salary_display').textContent = 'Selecione o cargo acima';
+  document.getElementById('diaria_display').textContent = '—';
+  document.getElementById('selfie-contrato-preview').style.display = 'none';
+  document.getElementById('selfie-reg-preview').style.display = 'none';
+  document.getElementById('camera-contrato-wrap').innerHTML = `<button class="btn btn-camera" onclick="abrirCamera('contrato')">📷 Abrir Câmera</button>`;
+  document.getElementById('camera-reg-wrap').innerHTML      = `<button class="btn btn-camera" onclick="abrirCamera('reg')">📷 Abrir Câmera</button>`;
+  document.getElementById('btn-assinar-contrato').disabled = true;
+  document.getElementById('btn-finalizar').disabled = true;
+  goTo(1);
+}
+</script>
+</body>
+</html>
